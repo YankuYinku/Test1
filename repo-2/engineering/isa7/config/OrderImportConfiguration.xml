@@ -1,0 +1,18 @@
+<OrderImportConfiguration>
+  <Name>OrderImportConfiguration.xml</Name>
+  <InputFolder>\\storage.file.core.windows.net\cifdata\OrderImport\Import</InputFolder>
+  <ProcessingFolder>\\storage.file.core.windows.net\cifdata\OrderImport\Processing</ProcessingFolder>
+  <ArchiveFolder>\\storage.file.core.windows.net\cifdata\OrderImport\Archive</ArchiveFolder>
+  <ErrorFolder>\\storage.file.core.windows.net\cifdata\OrderImport\Error</ErrorFolder>
+  <DefaultEntryCashCentre>CashCentre</DefaultEntryCashCentre>
+  <DaysInArchive>5</DaysInArchive>
+  <MaxFilesToRead>10</MaxFilesToRead>
+  <CashCentreCode>5102</CashCentreCode>
+  <ConsolidateOrders>Yes</ConsolidateOrders>
+  <IsaUser />
+  <IsaPassword />
+  <WintranAPIKey>VXWintranAPIKey</WintranAPIKey>
+  <OrdersAPIKey>VXOrdersAPIKey</OrdersAPIKey>
+  <ClientIdentifier>Client Code</ClientIdentifier>
+  <ArchiveEmptyFile>false</ArchiveEmptyFile>
+</OrderImportConfiguration>

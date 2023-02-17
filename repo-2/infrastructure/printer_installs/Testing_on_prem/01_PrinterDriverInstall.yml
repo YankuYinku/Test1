@@ -1,0 +1,62 @@
+
+---
+- hosts: zzAnsibleTestingEve
+  gather_facts: no
+  tasks:
+
+# Create the standard c:\Media folder that we use on on-prem VMs
+  - name: Create Media folder on C
+    ansible.windows.win_file:
+      path: C:\Media
+      state: directory
+
+# Copy Printer Driver HP  #remotesrc copy - relook at
+  - name: Copy HP Printer driver exe file
+    copy:
+      src: '/data2/EveTest/UniversalHP/upd-pcl6-x64-7.0.1.24923.exe'
+      dest: C:/Media
+# Rename file format to .zip - check for native rename
+# - name: rename exe to zip
+#  ansible.windows.win_powershell:
+#    script:  |
+#           if (test-path 'C:\users\503609\desktop\upd-pcl6-x64-7.0.1.24923NEW.zip') {
+#                  $Ansible.Changed = $false
+#               }
+#       else {
+#         $Ansible.Changed = $true
+#        rename-item -path 'C:\users\503609\desktop\upd-pcl6-x64-7.0.1.24923NEW.exe' -newname 'C:\users\503609\desktop\upd-pcl6-x64-7.0.1.24923NEW.zip'
+#               }
+
+# Unzip Printer Driver HP - native one has issues (ansible module)
+# - name: Unzip Printer Driver HP
+#  ansible.windows.win_powershell:
+#   script: |
+#    if (test-path 'c:/media/Web Services 1.9.4.0') {
+#      $Ansible.Changed = $false
+#  }
+# else {
+#   $Ansible.Changed = $true
+#  Expand-Archive -path 'C:\users\503609\desktop\upd-pcl6-x64-7.0.1.24923NEW.zip' -destinationpath c:/users/503609/desktop/upd-pcl6-x64-7.0.1.24923NEW
+# }
+# Install HP Printer Driver - try ansible.windows.win_package - using the installerID
+# - name: Check if HP PCL 6 Universal Printer Driver is installed
+#  ansible.windows.win_powershell:
+#   script: |
+#    if ((get-itemproperty -path 'HKLM:\SYSTEM\CurrentControlSet\Control\Print\Printers\HP Universal Printing PCL 6\').name -eq 'HP Universal Printing PCL 6') {
+#      $Ansible.Changed = $false
+#  }
+# else {
+#   $Ansible.Changed = $true
+# }
+#   register: HPPCL6  # like creating a list of variables - that can be called/looked at back in one ansible run ie. if variable is true then run as in line 49
+#
+#  - name: Install HP Printer Driver if required
+#    ansible.windows.win_package:
+#      path: 'c:/users/503609/desktop/upd-pcl6-x64-7.0.1.24923NEW/Install.exe'
+#      arguments: /h /nd /q
+#    when: HPPCL6.changed   #check from 43 has changed then run the code directly above
+
+# Add Printers via TCP & set driver - printer names? printer settings?
+
+#win_printer - does not exist anymore - any ansible modules that can be used?
+#follow idea of adding in indivual printer with settings 1st on my machine or just go straight to a dev machine? there are plenty

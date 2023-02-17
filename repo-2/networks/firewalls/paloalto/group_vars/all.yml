@@ -1,0 +1,27 @@
+# Shared settings for all Palo Alto firewalls
+ansible_python_interpreter: '{{ ansible_playbook_python }} '
+login_banner: 'Property of Vaultex UK'
+username: 'admin'
+domain: 'vaultexuk.net'
+timezone: 'Europe/London'
+
+# Encrypted Password using Ansible Vault
+password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          35356336343561303337313361633361363134323266336231346665346632653738373330653531
+          6239313365346235303535323238313935633161336363610a323832633337626534303731306231
+          66333263363264663665646439653533353636356333373162643430623164616536666131663932
+          3064663530343263660a646363363131396463313762616236323837616336323764313665643931
+          3563
+
+
+# SNMP v2c Settings
+snmp_profile: 'VTX'
+snmp_name: 'VTX-Solarwinds'
+snmp_manager: '10.51.29.30'
+snmp_community: 'Vau1t3xUK5nmp01RW'
+
+# Device service settings
+dns1: '10.51.37.1'
+dns2: '10.51.25.1'
+ntp1: 'ntp.vaultexuk.net'

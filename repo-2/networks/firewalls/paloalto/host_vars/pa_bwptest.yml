@@ -1,0 +1,57 @@
+---
+# Connection details for the primary and secondary members of the HA pair.
+primary_ip_address: '10.1.154.53'
+secondary_ip_address: 'FW-2 IP Address'
+
+# All other playbooks in this repository connect to 'ip_address', so define that as the primary device.
+ip_address: '{{ primary_ip_address }}'
+
+# Encrypted API Key using Ansible Vault
+# To be recreated when in prod
+api_key: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          66316461333437613138383133306136663635386432633334656663313062303738616137313264
+          3761636663666561373333376364653738656137303536380a343538396538643734303565653966
+          62383334396565333461353438626233326363653964396462333332633361626435656237363334
+          6139383535323233630a383632346233393438353137316437323334653264656236666131616661
+          39366539323731616565653138666661636438356162383638356432393038643766373238316238
+          65636430646161373764666662363334653638383834663733393138383563663763303363343435
+          62653432333239376534623462306564323239376465306332383331333632666231353430343037
+          32343436353162323430666333376436346363626431343535663936393465303538303665376638
+          62613235643436353263356430396532656232633731353664316264313238353636343137396638
+          31383536646266623735323963663563623936373732376536336532313838356135353039393336
+          356634656330663230396433386138393037
+
+# Device hostname
+hostname: 'VAUL-BRGTEST-850-FW1'
+
+# Device service settings
+dns1: '10.51.37.1'
+dns2: '10.51.25.1'
+ntp1: '10.51.44.10'
+ntp2: '10.51.29.10'
+
+# Device interface / IP settings
+interfaces:
+  - { if_name: 'ethernet1/1', mode: 'layer3', ip: ['10.51.40.113/28'],  enable_dhcp: false }
+  - { if_name: 'ethernet1/2', mode: 'layer3', ip: ['10.51.42.14/28'],  enable_dhcp: false }
+  - { if_name: 'ethernet1/3', mode: 'layer3', ip: ['10.51.43.254/24'],  enable_dhcp: false }
+
+# Device security zones
+zones:
+  - { zone: 'Vaultex-Trust', mode: 'layer3', interfaces: ['ethernet1/1'] }
+  - { zone: 'Test-LAN', mode: 'layer3', interfaces: ['ethernet1/2'] }
+  - { zone: 'Test-LAN2', mode: 'layer3', interfaces: ['ethernet1/3']  }
+
+
+# Device routing
+virtual_router:
+  - { name: 'default', interface: ['ethernet1/1','ethernet1/2','ethernet1/3'] }
+
+
+static_routes:
+    - { name: "default",	destination: "0.0.0.0/0", nexthop:  "10.51.40.126" }
+    - { name: "10.51.41.0_24",	destination: "10.51.41.0/24", nexthop:  "10.51.41.1" }
+    - { name: "10.51.43.0_24",	destination: "10.51.43.0/24", nexthop:  "10.51.43.1" }
+    - { name: "10.51.42.128_25",	destination: "10.51.42.128/25", nexthop:  "10.51.42.254" }
+    - { name: "10.51.42.0_24",	destination: "10.51.42.0/24", nexthop:  "10.51.42.1" }

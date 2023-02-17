@@ -1,0 +1,29 @@
+---
+- name: Set Login page Environment name
+  hosts: isa7databaseprimary
+  become_method: runas
+  tasks:
+  - name: update maestro textdata
+    win_shell: |
+      Invoke-Sqlcmd -Query "USE ISADB
+      DECLARE @envir varchar(20)
+      select @envir = @@servername
+      select @envir
+
+      update  [maestro].[TextData] set TEXT = 
+      CASE 
+      WHEN @envir = 'devappsisad2' THEN 'DEV'
+      WHEN @envir = 'devappsisad1' THEN 'DEV'
+      WHEN @envir = 'devappsisad2d1' THEN 'DEV 2'
+      WHEN @envir = 'devappsisad2d2' THEN 'DEV 2'
+      WHEN @envir = 'sitappsisad1' THEN 'SIT'
+      WHEN @envir = 'sitappsisad2' THEN 'SIT'
+      WHEN @envir = 'tstappsisad1' THEN 'DEMO'
+      WHEN @envir = 'tstappsisad2' THEN 'DEMO'
+      WHEN @envir = 'devappsisastd1' THEN 'ST'
+      WHEN @envir = 'devappsisastd2' THEN 'ST'
+      END
+      where  textid like '%ApplicationTitle%'"
+    become: yes
+    become_user: vtxadmin
+

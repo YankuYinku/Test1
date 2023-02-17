@@ -1,0 +1,12 @@
+---
+# Connection details for the primary and secondary members of the HA pair.
+primary_ip_address: '10.1.154.51'
+secondary_ip_address: 'FW-2 IP Address'
+
+# All other playbooks in this repository connect to 'ip_address', so define that as the primary device.
+ip_address: '{{ primary_ip_address }}'
+
+api_key: LUFRPT1pa3hiYm0zcmVHOUtGSjBZSFpKeXRhUGdUVHc9clU5RHF1Y3FDYTVPNHU0WmhacFJLZE5kaU56Ly8wYmgzMGRsYXdpMEJCaUp1WW10ZE8ycWYwOTZIT0hFcld0bg==
+
+# Device hostname
+hostname: 'VAUL-DC3-PA-FW1'

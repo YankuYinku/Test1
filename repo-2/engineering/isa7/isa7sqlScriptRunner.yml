@@ -1,0 +1,90 @@
+---
+- name: Run SQL Scripts
+  hosts: isa7databaseprimary
+  become_method: runas
+  tasks:
+  - name: Create SQLScripts folder on C
+    ansible.windows.win_file:
+      path: c:\SqlScripts\log
+      state: directory
+  - name: Copy Scripts to SQLScripts folder
+    ansible.windows.win_copy:
+      src: /data/sqlscripts/
+      dest: C:/SqlScripts
+  - name: Check to see if there are scripts in folder
+    ansible.windows.win_powershell:
+      script: |
+          if (test-path C:\SqlScripts\*.sql) {
+          $Ansible.Changed = $true
+          }
+          else {
+          $Ansible.Changed = $false
+          }
+    register: sqlscript
+
+- name: Run SQL Scripts
+  hosts: isa7databaseprimary
+  become_method: runas
+  tasks:
+  - name: Backup database
+    win_shell: |
+        $env=$env:computername.substring(0,3)
+        $node1=$env+"appsisad1"
+        $node2=$env+"appsisad2"
+        $agname=$env+"appsisaag1"
+
+        #figure out the primary replica
+        $primaryReplica = Invoke-Sqlcmd -Query "SELECT hags.primary_replica
+        FROM sys.dm_hadr_availability_group_states hags
+        INNER JOIN sys.availability_groups ag ON ag.group_id = hags.group_id" -ServerInstance $env:computername -QueryTimeout 0 
+
+        #run code against primary replica
+        $database="ISADB"
+        $filename="ISADB_$(get-date -f yyyy-MM-dd-hhmmss).bak"
+        Invoke-Sqlcmd -Query "backup database ISADB to disk = '$filename' with copy_only, checksum, stats;" -ServerInstance $primaryReplica[0] -Database $database -Verbose -AbortOnError -QueryTimeout 0
+    become: yes
+    become_user: vtxadmin
+    when: sqlscript.changed
+
+  - name: Execute all .sql scripts
+    win_shell: |
+        $env=$env:computername.substring(0,3)
+        $node1=$env+"appsisad1"
+        $node2=$env+"appsisad2"
+        $agname=$env+"appsisaag1"
+
+        #figure out the primary replica
+        $primaryReplica = Invoke-Sqlcmd -Query "SELECT hags.primary_replica
+        FROM sys.dm_hadr_availability_group_states hags
+        INNER JOIN sys.availability_groups ag ON ag.group_id = hags.group_id" -ServerInstance $env:computername
+
+        $database="ISADB"
+        $script_folder="C:\SqlScripts"
+        
+        $scripts=Get-ChildItem $script_folder | Where-Object name -like *.sql | sort-object {[int]($_.basename -replace '\D')} | ForEach-Object {$_.FullName}
+        
+        foreach ($script in $scripts)
+            {
+            "Running $script on $primaryReplica[0] $database at $(get-date -f yyyy-MM-dd-hhmmss)" | Tee-Object -FilePath 'C:\SqlScripts\log\scriptlog.txt' -Append
+            Invoke-Sqlcmd -InputFile $script -ServerInstance $primaryReplica[0] -Database $database -Verbose *>> 'C:\SqlScripts\log\sqloutput.txt'
+            }
+    become: yes
+    become_user: vtxadmin
+    when: sqlscript.changed
+
+- name: Archive SQL Scripts
+  hosts: isa7databaseprimary
+  become_method: runas
+  tasks:
+  - name: Create SQLScripts archive folder on C
+    ansible.windows.win_file:
+      path: c:\SqlScripts\archive
+      state: directory
+  - name: Move Scripts to SQLScripts archive folder
+    win_shell: |
+          Move-Item -Path 'C:\SqlScripts\*.sql' -Destination "C:\SqlScripts\archive" -force
+          write-output "changed"
+    become: yes
+    become_user: vtxadmin
+    register: movesqlscripts
+    changed_when: "'changed' in movesqlscripts.stdout"
